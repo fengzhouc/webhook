@@ -14,7 +14,7 @@ import (
 构造透传，再处理的webhook服务器
 */
 type MsgModel struct {
-	Content             string   `json:"content" binding:"required"`
+	Content             string   `json:"content"`
 	MentionedList       []string `json:"mentioned_list"`        //@谁，需要指定userid
 	MentionedMobileList []string `json:"mentioned_mobile_list"` // 如果获取不到userid，可以使用手机号
 }
@@ -32,59 +32,9 @@ func (medol *WxMsgModel) String() string {
 	return string(jsons)
 }
 
+// TODO: 企业微信机器人发送的消息不能超过20条/分钟。
+// Fix: 为了保证不丢失消息，这里搞个消息队列去处理消息吧，
 func (text *WxMsgModel) Send() error {
-	resp, err := http.Post(config.Config.WxServerSetting.Api, "application/json", strings.NewReader(text.String()))
-	if err != nil {
-		return err
-	}
-	defer resp.Body.Close()                //设置最后关闭resp
-	body, err := ioutil.ReadAll(resp.Body) //获取响应数据
-	if err != nil {
-		return nil
-	}
-	fmt.Println(string(body))
-	return nil
-}
-
-// markdown格式的内容
-type WxMsgMdModel struct {
-	MsgType  string   `json:"msgtype" binding:"required"`
-	Markdown MsgModel `json:"markdown" binding:"required"`
-}
-
-// 封装成json字符串
-func (medol *WxMsgMdModel) String() string {
-	jsons, _ := json.Marshal(medol)
-	return string(jsons)
-}
-
-func (text *WxMsgMdModel) Send() error {
-	resp, err := http.Post(config.Config.WxServerSetting.Api, "application/json", strings.NewReader(text.String()))
-	if err != nil {
-		return err
-	}
-	defer resp.Body.Close()                //设置最后关闭resp
-	body, err := ioutil.ReadAll(resp.Body) //获取响应数据
-	if err != nil {
-		return nil
-	}
-	fmt.Println(string(body))
-	return nil
-}
-
-// text格式的内容
-type WxMsgTextModel struct {
-	MsgType string   `json:"msgtype"`
-	Text    MsgModel `json:"text"`
-}
-
-// 封装成json字符串
-func (medol *WxMsgTextModel) String() string {
-	jsons, _ := json.Marshal(medol)
-	return string(jsons)
-}
-
-func (text *WxMsgTextModel) Send() error {
 	resp, err := http.Post(config.Config.WxServerSetting.Api, "application/json", strings.NewReader(text.String()))
 	if err != nil {
 		return err

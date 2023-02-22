@@ -14,14 +14,11 @@ var (
 )
 
 type GlobalSetting struct {
-	WxServerSetting WxServerSetting `yaml:"wxserver"`
+	WxServerSetting WxServerSetting `yaml:"wx"`
 }
 
 type WxServerSetting struct {
-	Username string `yaml:"username"`
-	Password string `yaml:"password"`
-	Api      string `yaml:"api"`
-	ApiKey   string `yaml:"apikey"`
+	Api string `yaml:"webhook"`
 }
 
 // 'import config'的时候就会调用,所以用来做初始化,所以可以不用调用GetInstance去获取config对象
