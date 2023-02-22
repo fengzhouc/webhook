@@ -1,5 +1,2 @@
-wxserver:
-   api: ""
-   username: ""
-   password: ""
-   apikey: ""
+wx:
+   webhook: ""
