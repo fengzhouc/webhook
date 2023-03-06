@@ -25,7 +25,7 @@ func init() {
 // 获取消息队列对象，单例模式，默认容量100
 func getInstance() *MyMessageQueue {
 	once.Do(func() {
-		MsgQueue = NewMsgQueue(10)
+		MsgQueue = NewMsgQueue(100)
 	})
 	return MsgQueue
 }

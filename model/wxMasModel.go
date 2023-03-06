@@ -47,8 +47,7 @@ func (medol *WxMsgModel) String() string {
 	return string(jsons)
 }
 
-// TODO: 企业微信机器人发送的消息不能超过20条/分钟。
-// Fix: 为了保证不丢失消息，这里搞个消息队列去处理消息吧，
+// 发送webhook消息
 func (text *WxMsgModel) Send() error {
 	resp, err := http.Post(config.Config.WxServerSetting.Api, "application/json", strings.NewReader(text.String()))
 	if err != nil {

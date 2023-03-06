@@ -15,6 +15,13 @@ var (
 
 type GlobalSetting struct {
 	WxServerSetting WxServerSetting `yaml:"wx"`
+	DbSetting       DbSetting       `yaml:"db"`
+}
+type DbSetting struct {
+	Username  string `yaml:"username"`
+	Password  string `yaml:"password"`
+	Sqitepath string `yaml:"sqlitepath"`
+	Dburl     string `yaml:"dburl"`
 }
 
 type WxServerSetting struct {

@@ -9,7 +9,7 @@ import (
 // 处理发送限制的情况，另起线程进行消息的发送，比如企业微信每分钟20条的情况
 // 优化：可不可以发送失败的就存到重试队列，然后发送下一个，因为不同的webhook可能限制不一样，一致等待一个就不太好
 func Start() {
-	retryQueue := msgqueue.NewMsgQueue(10)
+	retryQueue := msgqueue.NewMsgQueue(100)
 	for {
 		msg := msgqueue.MsgQueue.Pull(3)
 		if msg != nil {
