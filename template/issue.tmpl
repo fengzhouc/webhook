@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <title>告警详情</title>
+</head>
+<body>
+    <form action="http://localhost:8000/issues/{{.Id}}/handle" method="post" enctype="application/x-www-form-urlencoded">
+        <b>告警详情:</b>
+        <p>{{.Desc}}</p>
+        <b>处置动作:</b>
+        <select name="handle">
+            <option value ="观察">观察</option>
+            <option value ="误报">误报</option>
+            <option value="阻断">阻断</option>
+        </select>
+        <br>
+        <b>处置记录:</b><br>
+        <textarea name="handledesc" rows="10" cols="50"> </textarea>
+        <br>
+        <b>状态:</b>
+         <select name="status">
+            <option value ="进行中">进行中</option>
+            <option value ="关闭">关闭</option>
+        </select>
+        <br>
+        <input type="submit" value="提交">
+    </form>
+</body>
+</html>

@@ -21,9 +21,9 @@ func IssueListen() {
 		msg := model.WxMsgModel{}
 		msg.MsgType = "markdown"
 		//根据issueId构造访问url，添加到告警内容中
-		note := fmt.Sprintf("**未处置的告警(%d),详情如下~**", len(query.Rows))
+		note := fmt.Sprintf("**未处置的告警(%d),详情(id=%d)如下~**", len(query.Rows), row.Id)
 		note += fmt.Sprintf("\n>%s", row.Desc)
-		note += fmt.Sprintf("\n\n点击[此处](%s/%d)闭环告警", "http://url", row.Id)
+		note += fmt.Sprintf("\n\n点击[此处](%s/%d)闭环告警", "http://127.0.0.1:8000/issues", row.Id)
 		msg.Markdown.Content = note
 
 		// 再添加消息队列中，如果队列满了，超时返回异常，不过异常也没关系，后面还有定时任务提醒未关闭的告警
