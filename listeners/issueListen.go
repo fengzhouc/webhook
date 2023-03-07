@@ -21,7 +21,7 @@ func IssueListen() {
 		msg := model.WxMsgModel{}
 		msg.MsgType = "markdown"
 		//根据issueId构造访问url，添加到告警内容中
-		note := "**未处置的告警,告警详情如下~**"
+		note := fmt.Sprintf("**未处置的告警(%d),详情如下~**", len(query.Rows))
 		note += fmt.Sprintf("\n>%s", row.Desc)
 		note += fmt.Sprintf("\n\n点击[此处](%s/%d)闭环告警", "http://url", row.Id)
 		msg.Markdown.Content = note

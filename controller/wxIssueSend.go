@@ -20,16 +20,19 @@ func WxIssueSend(c *gin.Context) {
 	query := issue.DbQuery{}
 	query.DB = issue.DbConn.DB
 	query.Table = "issues"
+	note := "**来告警了,老弟~**"
 	if msg.MsgType == "text" {
 		issueId := query.Insert(msg.Text.Content)
 		//根据issueId构造访问url，添加到告警内容中
 		click := fmt.Sprintf("\n\n点击[此处](%s/%d)闭环告警", "url", issueId)
+		msg.Text.Content = fmt.Sprintf("%s\n>%s", note, msg.Text.Content)
 		msg.Text.Content += click
 	} else {
 		issueId := query.Insert(msg.Markdown.Content)
 		//根据issueId构造访问url，添加到告警内容中
 		click := fmt.Sprintf("\n\n点击[此处](%s/%d)闭环告警", "http://url", issueId)
-		msg.Text.Content += click
+		msg.Markdown.Content = fmt.Sprintf("%s\n>%s", note, msg.Markdown.Content)
+		msg.Markdown.Content += click
 	}
 	// 再添加消息队列中，如果队列满了，超时返回异常，不过异常也没关系，后面还有定时任务提醒未关闭的告警
 	err := msgqueue.MsgQueue.Send(&msg)
