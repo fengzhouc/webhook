@@ -1,10 +1,14 @@
 package main
 
 import (
+	"fmt"
+	"webhook/config"
 	"webhook/controller"
 	"webhook/engine"
+	"webhook/listeners"
 
 	"github.com/gin-gonic/gin"
+	"github.com/robfig/cron"
 )
 
 func main() {
@@ -12,6 +16,21 @@ func main() {
 	r := gin.Default()
 	// 另起线程进行消息的发送
 	go engine.Start()
+	// 未关闭告警的监控
+	aspec := config.Config.CronSetting.ListenCron
+	if aspec != "" {
+		a := cron.New()
+		aerr := a.AddFunc(aspec, func() {
+			listeners.IssueListen()
+		})
+		if aerr != nil {
+			fmt.Println("AddFunc error :", aerr)
+			return
+		}
+		a.Start()
+		defer a.Stop()
+	}
+
 	// 2.绑定路由规则，执行的函数
 	// 完全复刻企微webhook接口的基本参数
 	r.POST("/webhook/wx/send", controller.WxSend)

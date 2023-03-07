@@ -16,12 +16,14 @@ var (
 type GlobalSetting struct {
 	WxServerSetting WxServerSetting `yaml:"wx"`
 	DbSetting       DbSetting       `yaml:"db"`
+	CronSetting     CronSetting     `yaml:"cron"`
+}
+
+type CronSetting struct {
+	ListenCron string `yaml:"listen"`
 }
 type DbSetting struct {
-	Username  string `yaml:"username"`
-	Password  string `yaml:"password"`
-	Sqitepath string `yaml:"sqlitepath"`
-	Dburl     string `yaml:"dburl"`
+	Sqitepath string `yaml:"path"`
 }
 
 type WxServerSetting struct {

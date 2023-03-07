@@ -1,2 +1,8 @@
 wx:
-   webhook: ""
+   webhook: "https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=745853d5-f217-4666-ae73-6a59659b9734"
+
+db:
+   path: "./issues.db"
+
+cron:
+   listen: "0 */10 * * * 1-5"
