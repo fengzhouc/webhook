@@ -16,8 +16,6 @@ func IssueListen() {
 	query.Search()
 	for _, row := range query.Rows {
 		//构造webhook消息并发送
-		// 告警内容附带快捷访问url（根据id拼接url）
-		// msgqueue.MsgQueue.Send("")
 		msg := model.WxMsgModel{}
 		msg.MsgType = "markdown"
 		//根据issueId构造访问url，添加到告警内容中

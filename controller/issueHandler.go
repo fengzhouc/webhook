@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"net/http"
 	"webhook/issue"
+	"webhook/model"
+	"webhook/msgqueue"
 
 	"github.com/gin-gonic/gin"
 )
@@ -59,4 +61,34 @@ func IssueHandler(context *gin.Context) {
 	query.Table = "issues"
 	query.Update(id.Id, form.Handle, form.HandleDesc, form.Status)
 	context.String(http.StatusOK, "OK")
+	// 加一个，处置完后，展示告警处置情况
+	AfterHandle(id.Id)
+}
+
+// 告警处理后，在发送消息，展示处理情况
+func AfterHandle(IssueId string) {
+	// 根据url的id，查询告警内容
+	query := issue.DbQuery{}
+	query.DB = issue.DbConn.DB
+	query.Table = "issues"
+	query.Wherestring = fmt.Sprintf("id=\"%s\"", IssueId)
+	query.Search()
+
+	//构造webhook消息并发送
+	msg := model.WxMsgModel{}
+	msg.MsgType = "markdown"
+	for _, row := range query.Rows {
+		//根据issueId构造访问url，添加到告警内容中
+		note := fmt.Sprintf("**处置的告警详情(id=%s)如下~**", IssueId)
+		note += fmt.Sprintf("\n>%s", row.Desc)
+		note += "\n\n**处置情况如下:**"
+		note += fmt.Sprintf("\n>**处置动作:**%s", row.Handle)
+		note += fmt.Sprintf("\n>**处置记录:**%s", row.HandleDesc)
+		note += fmt.Sprintf("\n>**告警状态:**%s", row.Status)
+		note += fmt.Sprintf("\n\n点击[此处](%s/%d)查看告警详情", "http://127.0.0.1:8000/issues", row.Id)
+		msg.Markdown.Content = note
+
+		// 再添加消息队列中，如果队列满了，超时返回异常，不过异常也没关系，后面还有定时任务提醒未关闭的告警
+		msgqueue.MsgQueue.Send(&msg)
+	}
 }
