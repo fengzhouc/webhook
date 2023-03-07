@@ -4,4 +4,5 @@ package model
 type MsgModel interface {
 	String() string
 	Send() error
+	SetContent(msg string, msgtype string)
 }

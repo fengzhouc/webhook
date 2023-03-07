@@ -22,13 +22,13 @@ func WxIssueSend(c *gin.Context) {
 	query.Table = "issues"
 	note := "**来告警了,老弟~**"
 	if msg.MsgType == "text" {
-		issueId := query.Insert(msg.Text.Content)
+		issueId := query.Insert(msg.Text.Content, "wx")
 		//根据issueId构造访问url，添加到告警内容中
 		click := fmt.Sprintf("\n\n点击[此处](%s/%d)闭环告警", "url", issueId)
 		msg.Text.Content = fmt.Sprintf("%s\n>%s", note, msg.Text.Content)
 		msg.Text.Content += click
 	} else {
-		issueId := query.Insert(msg.Markdown.Content)
+		issueId := query.Insert(msg.Markdown.Content, "wx")
 		//根据issueId构造访问url，添加到告警内容中
 		click := fmt.Sprintf("\n\n点击[此处](%s/%d)闭环告警", "http://url", issueId)
 		msg.Markdown.Content = fmt.Sprintf("%s\n>%s", note, msg.Markdown.Content)
