@@ -14,11 +14,16 @@ var (
 )
 
 type GlobalSetting struct {
-	WxServerSetting WxServerSetting `yaml:"wx"`
-	DbSetting       DbSetting       `yaml:"db"`
-	CronSetting     CronSetting     `yaml:"cron"`
+	ServerSetting        ServerSetting        `yaml:"server"`
+	WebHookServerSetting WebHookServerSetting `yaml:"webhook"`
+	DbSetting            DbSetting            `yaml:"db"`
+	CronSetting          CronSetting          `yaml:"cron"`
 }
 
+// webhook服务器的基本信息
+type ServerSetting struct {
+	BaseUrl string `yaml:"baseurl"` // 对外访问的url
+}
 type CronSetting struct {
 	ListenCron string `yaml:"listen"`
 }
@@ -26,8 +31,9 @@ type DbSetting struct {
 	Sqitepath string `yaml:"path"`
 }
 
-type WxServerSetting struct {
-	Api string `yaml:"webhook"`
+// 这里是所有支持的webhook接口，也就是适配的各种
+type WebHookServerSetting struct {
+	Wx string `yaml:"wx"`
 }
 
 // 'import config'的时候就会调用,所以用来做初始化,所以可以不用调用GetInstance去获取config对象

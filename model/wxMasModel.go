@@ -49,7 +49,7 @@ func (medol *WxMsgModel) String() string {
 
 // 发送webhook消息
 func (text *WxMsgModel) Send() error {
-	resp, err := http.Post(config.Config.WxServerSetting.Api, "application/json", strings.NewReader(text.String()))
+	resp, err := http.Post(config.Config.WebHookServerSetting.Wx, "application/json", strings.NewReader(text.String()))
 	if err != nil {
 		fmt.Println("[wx.Send.Post] ", err)
 		return err
@@ -68,4 +68,15 @@ func (text *WxMsgModel) Send() error {
 	}
 
 	return nil
+}
+
+// 设置消息内容
+func (text *WxMsgModel) SetContent(msg string, msgtype string) {
+	if msgtype == "text" {
+		text.MsgType = "text"
+		text.Text.Content = msg
+	} else {
+		text.MsgType = "markdown"
+		text.Markdown.Content = msg
+	}
 }

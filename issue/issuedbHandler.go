@@ -67,18 +67,19 @@ type RowModel struct {
 	Handle     string
 	HandleDesc string
 	Status     string
+	Form       string
 }
 
 // 查询数据
 func (query *DbQuery) Search() {
-	sql := fmt.Sprintf("SELECT id,desc,handle,handleDesc,status FROM %s WHERE %s;", query.Table, query.Wherestring)
+	sql := fmt.Sprintf("SELECT id,desc,handle,handleDesc,status,form FROM %s WHERE %s;", query.Table, query.Wherestring)
 	rows, err := query.DB.Query(sql)
 	if err != nil {
 		fmt.Println("[SELECT error] ", err)
 	} else {
 		for rows.Next() {
 			var row RowModel
-			err := rows.Scan(&row.Id, &row.Desc, &row.Handle, &row.HandleDesc, &row.Status)
+			err := rows.Scan(&row.Id, &row.Desc, &row.Handle, &row.HandleDesc, &row.Status, &row.Form)
 			if err == nil {
 				query.Rows = append(query.Rows, row)
 			} else {
@@ -89,9 +90,11 @@ func (query *DbQuery) Search() {
 }
 
 // 插入数据，不需要检查是否已有,返回id
-func (query *DbQuery) Insert(msg string) (id int64) {
-	sql := fmt.Sprintf("INSERT INTO %s (\"desc\",\"status\",\"handle\",\"handleDesc\") VALUES (?,?,?,?);", query.Table)
-	res, err := query.DB.Exec(sql, msg, "进行中", "", "")
+// msg: 内容
+// form: 来自那个接口的，这个值会映射到配置文件中适配的webhook接口，也就是机器人列表
+func (query *DbQuery) Insert(msg string, form string) (id int64) {
+	sql := fmt.Sprintf("INSERT INTO %s (\"desc\",\"status\",\"handle\",\"handleDesc\",\"form\") VALUES (?,?,?,?,?);", query.Table)
+	res, err := query.DB.Exec(sql, msg, "进行中", "", "", form)
 	if err != nil {
 		fmt.Println("[insert error] ", err)
 	} else {
