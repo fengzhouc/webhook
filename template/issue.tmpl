@@ -9,6 +9,7 @@
         <textarea rows="10" cols="50" disabled>{{.Desc}}</textarea><br>
         <b>处置动作:</b>
         <select name="handle">
+            <option value ="{{.Handle}}">{{.Handle}}</option>
             <option value ="观察">观察</option>
             <option value ="误报">误报</option>
             <option value="阻断">阻断</option>
@@ -19,6 +20,7 @@
         <br>
         <b>状态:</b>
          <select name="status">
+            <option value ="{{.Status}}">{{.Status}}</option>
             <option value ="进行中">进行中</option>
             <option value ="关闭">关闭</option>
         </select>
