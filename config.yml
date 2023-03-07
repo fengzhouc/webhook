@@ -1,8 +1,11 @@
-wx:
-   webhook: "https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=745853d5-f217-4666-ae73-6a59659b9734"
+server:
+   baseurl: "http://127.0.0.1:8000"
+
+webhook:
+   wx: ""
 
 db:
    path: "./issues.db"
 
 cron:
-   listen: "0 */10 * * * 1-5"
+   listen: "0 */1 * * * 1-5"
