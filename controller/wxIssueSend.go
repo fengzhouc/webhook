@@ -3,6 +3,7 @@ package controller
 import (
 	"fmt"
 	"net/http"
+	"webhook/config"
 	"webhook/issue"
 	"webhook/model"
 	"webhook/msgqueue"
@@ -30,7 +31,7 @@ func WxIssueSend(c *gin.Context) {
 	} else {
 		issueId := query.Insert(msg.Markdown.Content, "wx")
 		//根据issueId构造访问url，添加到告警内容中
-		click := fmt.Sprintf("\n\n点击[此处](%s/%d)闭环告警", "http://url", issueId)
+		click := fmt.Sprintf("\n\n点击[此处](%s/issues/%d)闭环告警", config.Config.ServerSetting.BaseUrl, issueId)
 		msg.Markdown.Content = fmt.Sprintf("%s\n>%s", note, msg.Markdown.Content)
 		msg.Markdown.Content += click
 	}

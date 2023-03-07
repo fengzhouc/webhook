@@ -1,5 +1,6 @@
 server:
    baseurl: "http://127.0.0.1:8000"
+   addr: ":8000"
 
 webhook:
    wx: ""
@@ -8,4 +9,4 @@ db:
    path: "./issues.db"
 
 cron:
-   listen: "0 */1 * * * 1-5"
+   listen: "0 */30 * * * 1-5"

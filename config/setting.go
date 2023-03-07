@@ -23,6 +23,7 @@ type GlobalSetting struct {
 // webhook服务器的基本信息
 type ServerSetting struct {
 	BaseUrl string `yaml:"baseurl"` // 对外访问的url
+	Addr    string `yaml:"addr"`    // 运行host:port
 }
 type CronSetting struct {
 	ListenCron string `yaml:"listen"`
