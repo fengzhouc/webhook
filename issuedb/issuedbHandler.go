@@ -107,8 +107,8 @@ func (query *DbQuery) Insert(msg string, form string) (issueId string) {
 
 // 更新数据,用于
 func (query *DbQuery) Update(id string, handle string, handleDesc string, status string) error {
-	sql := fmt.Sprintf("UPDATE %s SET \"handle\"=?,\"handleDesc\"=?,\"status\"=?, \"update\"=CURRENT_TIMESTAMP WHERE id=%s", query.Table, id)
-	_, err := query.DB.Exec(sql, handle, handleDesc, status)
+	sql := fmt.Sprintf("UPDATE %s SET \"handle\"=?,\"handleDesc\"=?,\"status\"=?, \"update\"=CURRENT_TIMESTAMP WHERE issueId=?", query.Table)
+	_, err := query.DB.Exec(sql, handle, handleDesc, status, id)
 	if err != nil {
 		fmt.Println("[update error] ", err)
 		return err
