@@ -4,7 +4,7 @@
     <title>告警详情</title>
 </head>
 <body>
-    <form action="http://localhost:8000/issues/{{.Id}}/handle" method="post" enctype="application/x-www-form-urlencoded">
+    <form action="/issues/{{.Id}}/handle" method="post" enctype="application/x-www-form-urlencoded">
         <b>告警详情: </b><br>
         <textarea rows="10" cols="50" disabled>{{.Desc}}</textarea><br>
         <b>处置动作: </b>
