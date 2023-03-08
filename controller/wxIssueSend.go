@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"webhook/config"
-	"webhook/issue"
+	"webhook/issuedb"
 	"webhook/model"
 	"webhook/msgqueue"
 
@@ -18,20 +18,20 @@ func WxIssueSend(c *gin.Context) {
 		c.String(http.StatusOK, err.Error())
 	}
 	// 添加事件入库
-	query := issue.DbQuery{}
-	query.DB = issue.DbConn.DB
+	query := issuedb.DbQuery{}
+	query.DB = issuedb.DbConn.DB
 	query.Table = "issues"
 	note := "**来告警了,老弟~**"
 	if msg.MsgType == "text" {
 		issueId := query.Insert(msg.Text.Content, "wx")
 		//根据issueId构造访问url，添加到告警内容中
-		click := fmt.Sprintf("\n\n点击[此处](%s/%d)闭环告警", "url", issueId)
+		click := fmt.Sprintf("\n\n点击[此处](%s/%s)闭环告警", "url", issueId)
 		msg.Text.Content = fmt.Sprintf("%s\n>%s", note, msg.Text.Content)
 		msg.Text.Content += click
 	} else {
 		issueId := query.Insert(msg.Markdown.Content, "wx")
 		//根据issueId构造访问url，添加到告警内容中
-		click := fmt.Sprintf("\n\n点击[此处](%s/issues/%d)闭环告警", config.Config.ServerSetting.BaseUrl, issueId)
+		click := fmt.Sprintf("\n\n点击[此处](%s/issues/%s)闭环告警", config.Config.ServerSetting.BaseUrl, issueId)
 		msg.Markdown.Content = fmt.Sprintf("%s\n>%s", note, msg.Markdown.Content)
 		msg.Markdown.Content += click
 	}

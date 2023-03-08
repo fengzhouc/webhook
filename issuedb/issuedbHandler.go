@@ -1,4 +1,4 @@
-package issue
+package issuedb
 
 import (
 	"database/sql"
@@ -7,6 +7,7 @@ import (
 	"time"
 	"webhook/config"
 
+	"github.com/gofrs/uuid"
 	_ "github.com/mattn/go-sqlite3"
 )
 
@@ -62,7 +63,7 @@ type DbQuery struct {
 
 // 查询结果的结构体，包含全字段
 type RowModel struct {
-	Id         int64
+	Id         string
 	Desc       string
 	Handle     string
 	HandleDesc string
@@ -72,7 +73,7 @@ type RowModel struct {
 
 // 查询数据
 func (query *DbQuery) Search() {
-	sql := fmt.Sprintf("SELECT id,desc,handle,handleDesc,status,form FROM %s WHERE %s;", query.Table, query.Wherestring)
+	sql := fmt.Sprintf("SELECT issueId,desc,handle,handleDesc,status,form FROM %s WHERE %s;", query.Table, query.Wherestring)
 	rows, err := query.DB.Query(sql)
 	if err != nil {
 		fmt.Println("[SELECT error] ", err)
@@ -92,18 +93,16 @@ func (query *DbQuery) Search() {
 // 插入数据，不需要检查是否已有,返回id
 // msg: 内容
 // form: 来自那个接口的，这个值会映射到配置文件中适配的webhook接口，也就是机器人列表
-func (query *DbQuery) Insert(msg string, form string) (id int64) {
-	sql := fmt.Sprintf("INSERT INTO %s (\"desc\",\"status\",\"handle\",\"handleDesc\",\"form\") VALUES (?,?,?,?,?);", query.Table)
-	res, err := query.DB.Exec(sql, msg, "进行中", "", "", form)
+func (query *DbQuery) Insert(msg string, form string) (issueId string) {
+	sql := fmt.Sprintf("INSERT INTO %s (\"issueId\",\"desc\",\"status\",\"handle\",\"handleDesc\",\"form\") VALUES (?,?,?,?,?,?);", query.Table)
+	issueId = uuid.Must(uuid.NewV1()).String()
+	_, err := query.DB.Exec(sql, issueId, msg, "进行中", "", "", form)
 	if err != nil {
 		fmt.Println("[insert error] ", err)
 	} else {
-		id, err := res.LastInsertId()
-		if err == nil {
-			return id
-		}
+		return issueId
 	}
-	return -1
+	return "-1"
 }
 
 // 更新数据,用于
