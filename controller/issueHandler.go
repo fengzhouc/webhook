@@ -39,7 +39,7 @@ type FormBody struct {
 	Handle     string `form:"handle"`
 	HandleDesc string `form:"handledesc"`
 	Status     string `form:"status"`
-	IssueType  string `form:"issueType"`
+	IssueType  string `form:"issueType" binding:"required"`
 	Owner      string `form:"owner"`
 }
 
