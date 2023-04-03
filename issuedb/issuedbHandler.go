@@ -69,18 +69,20 @@ type RowModel struct {
 	HandleDesc string
 	Status     string
 	Form       string
+	IssueType  string
+	Owner      string
 }
 
 // 查询数据
 func (query *DbQuery) Search() {
-	sql := fmt.Sprintf("SELECT issueId,desc,handle,handleDesc,status,form FROM %s WHERE %s;", query.Table, query.Wherestring)
+	sql := fmt.Sprintf("SELECT issueId,desc,handle,handleDesc,status,form,issueType,owner FROM %s WHERE %s;", query.Table, query.Wherestring)
 	rows, err := query.DB.Query(sql)
 	if err != nil {
 		fmt.Println("[SELECT error] ", err)
 	} else {
 		for rows.Next() {
 			var row RowModel
-			err := rows.Scan(&row.Id, &row.Desc, &row.Handle, &row.HandleDesc, &row.Status, &row.Form)
+			err := rows.Scan(&row.Id, &row.Desc, &row.Handle, &row.HandleDesc, &row.Status, &row.Form, &row.IssueType, &row.Owner)
 			if err == nil {
 				query.Rows = append(query.Rows, row)
 			} else {
@@ -94,9 +96,9 @@ func (query *DbQuery) Search() {
 // msg: 内容
 // form: 来自那个接口的，这个值会映射到配置文件中适配的webhook接口，也就是机器人列表
 func (query *DbQuery) Insert(msg string, form string) (issueId string) {
-	sql := fmt.Sprintf("INSERT INTO %s (\"issueId\",\"desc\",\"status\",\"handle\",\"handleDesc\",\"form\") VALUES (?,?,?,?,?,?);", query.Table)
+	sql := fmt.Sprintf("INSERT INTO %s (\"issueId\",\"desc\",\"status\",\"handle\",\"handleDesc\",\"form\",\"issueType\",\"owner\") VALUES (?,?,?,?,?,?,?,?);", query.Table)
 	issueId = uuid.Must(uuid.NewV1()).String()
-	_, err := query.DB.Exec(sql, issueId, msg, "进行中", "", "", form)
+	_, err := query.DB.Exec(sql, issueId, msg, "进行中", "", "", form, "", "")
 	if err != nil {
 		fmt.Println("[insert error] ", err)
 	} else {
@@ -105,10 +107,10 @@ func (query *DbQuery) Insert(msg string, form string) (issueId string) {
 	return "-1"
 }
 
-// 更新数据,用于
-func (query *DbQuery) Update(id string, handle string, handleDesc string, status string) error {
-	sql := fmt.Sprintf("UPDATE %s SET \"handle\"=?,\"handleDesc\"=?,\"status\"=?, \"update\"=CURRENT_TIMESTAMP WHERE issueId=?", query.Table)
-	_, err := query.DB.Exec(sql, handle, handleDesc, status, id)
+// 更新数据,用于处置告警后的数据更新,传参要求：最后一个必须是issueId
+func (query *DbQuery) Update(msg ...interface{}) error {
+	sql := fmt.Sprintf("UPDATE %s SET \"handle\"=?,\"handleDesc\"=?,\"status\"=?,\"issueType\"=?,\"owner\"=?, \"update\"=CURRENT_TIMESTAMP WHERE issueId=?", query.Table)
+	_, err := query.DB.Exec(sql, msg...)
 	if err != nil {
 		fmt.Println("[update error] ", err)
 		return err

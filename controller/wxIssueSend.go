@@ -25,7 +25,7 @@ func WxIssueSend(c *gin.Context) {
 	if msg.MsgType == "text" {
 		issueId := query.Insert(msg.Text.Content, "wx")
 		//根据issueId构造访问url，添加到告警内容中
-		click := fmt.Sprintf("\n\n点击[此处](%s/%s)闭环告警", "url", issueId)
+		click := fmt.Sprintf("\n\n点击[此处](%s/issues/%s)闭环告警", config.Config.ServerSetting.BaseUrl, issueId)
 		msg.Text.Content = fmt.Sprintf("%s\n>%s", note, msg.Text.Content)
 		msg.Text.Content += click
 	} else {

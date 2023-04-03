@@ -6,7 +6,14 @@
 <body>
     <form action="/issues/{{.Id}}/handle" method="post" enctype="application/x-www-form-urlencoded">
         <b>告警详情: </b><br>
-        <textarea rows="10" cols="50" disabled>{{.Desc}}</textarea><br>
+        <textarea rows="20" cols="100" disabled>{{.Desc}}</textarea><br>
+        <b>事件类型: </b>
+        <select name="issueType">
+            <option value ="{{.IssueType}}">{{.IssueType}}</option>
+            <option value ="信息泄漏">信息泄漏</option>
+            <option value ="入侵告警">入侵告警</option>
+        </select>
+        <br>
         <b>处置动作: </b>
         <select name="handle">
             <option value ="{{.Handle}}">{{.Handle}}</option>
@@ -18,9 +25,13 @@
         <br>
         <b>处置记录: </b>
         <br>
-        <textarea name="handledesc" rows="10" cols="50">{{.HandleDesc}}</textarea>
+        <textarea name="handledesc" rows="10" cols="100">{{.HandleDesc}}</textarea>
         <br>
-        <b>状态: </b>
+         <b>责任人信息 (格式:公司/部门/名字): </b>
+        <br>
+        <textarea name="owner" rows="5" cols="50">{{.Owner}}</textarea>
+        <br>
+        <b>告警状态: </b>
          <select name="status">
             <option value ="{{.Status}}">{{.Status}}</option>
             <option value ="进行中">进行中</option>

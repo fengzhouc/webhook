@@ -39,6 +39,8 @@ type FormBody struct {
 	Handle     string `form:"handle"`
 	HandleDesc string `form:"handledesc"`
 	Status     string `form:"status"`
+	IssueType  string `form:"issueType"`
+	Owner      string `form:"owner"`
 }
 
 // 用于处理issue表单请求的数据处理
@@ -59,7 +61,7 @@ func IssueHandler(context *gin.Context) {
 	query := issuedb.DbQuery{}
 	query.DB = issuedb.DbConn.DB
 	query.Table = "issues"
-	query.Update(id.Id, form.Handle, form.HandleDesc, form.Status)
+	query.Update(form.Handle, form.HandleDesc, form.Status, form.IssueType, form.Owner, id.Id)
 	context.String(http.StatusOK, "OK")
 	// 加一个，处置完后，展示告警处置情况
 	AfterHandle(id.Id)
