@@ -95,10 +95,10 @@ func (query *DbQuery) Search() {
 // 插入数据，不需要检查是否已有,返回id
 // msg: 内容
 // form: 来自那个接口的，这个值会映射到配置文件中适配的webhook接口，也就是机器人列表
-func (query *DbQuery) Insert(msg string, form string) (issueId string) {
-	sql := fmt.Sprintf("INSERT INTO %s (\"issueId\",\"desc\",\"status\",\"handle\",\"handleDesc\",\"form\",\"issueType\",\"owner\") VALUES (?,?,?,?,?,?,?,?);", query.Table)
+func (query *DbQuery) Insert(msg string, form string, orgmsg string) (issueId string) {
+	sql := fmt.Sprintf("INSERT INTO %s (\"issueId\",\"desc\",\"status\",\"handle\",\"handleDesc\",\"form\",\"issueType\",\"owner\",\"orgmag\") VALUES (?,?,?,?,?,?,?,?,?);", query.Table)
 	issueId = uuid.Must(uuid.NewV1()).String()
-	_, err := query.DB.Exec(sql, issueId, msg, "进行中", "", "", form, "", "")
+	_, err := query.DB.Exec(sql, issueId, msg, "进行中", "", "", form, "", "", orgmsg)
 	if err != nil {
 		fmt.Println("[insert error] ", err)
 	} else {

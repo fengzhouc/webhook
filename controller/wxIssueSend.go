@@ -22,7 +22,7 @@ func WxIssueSend(c *gin.Context) {
 	query.DB = issuedb.DbConn.DB
 	query.Table = "issues"
 	note := "**来告警了,老弟~**\n"
-	issueId := query.Insert(msg.NoteString(), "wx")
+	issueId := query.Insert(msg.NoteString(), "wx", msg.String())
 	//根据issueId构造访问url，添加到告警内容中
 	click := fmt.Sprintf("\n\n点击[此处](%s/issues/%s)闭环告警", config.Config.ServerSetting.BaseUrl, issueId)
 	note += fmt.Sprintf(">%s", msg.NoteString())
