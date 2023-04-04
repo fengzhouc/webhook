@@ -71,18 +71,19 @@ type RowModel struct {
 	Form       string
 	IssueType  string
 	Owner      string
+	Orgmsg     string
 }
 
 // 查询数据
 func (query *DbQuery) Search() {
-	sql := fmt.Sprintf("SELECT issueId,desc,handle,handleDesc,status,form,issueType,owner FROM %s WHERE %s;", query.Table, query.Wherestring)
+	sql := fmt.Sprintf("SELECT issueId,desc,handle,handleDesc,status,form,issueType,owner,orgmsg FROM %s WHERE %s;", query.Table, query.Wherestring)
 	rows, err := query.DB.Query(sql)
 	if err != nil {
 		fmt.Println("[SELECT error] ", err)
 	} else {
 		for rows.Next() {
 			var row RowModel
-			err := rows.Scan(&row.Id, &row.Desc, &row.Handle, &row.HandleDesc, &row.Status, &row.Form, &row.IssueType, &row.Owner)
+			err := rows.Scan(&row.Id, &row.Desc, &row.Handle, &row.HandleDesc, &row.Status, &row.Form, &row.IssueType, &row.Owner, &row.Orgmsg)
 			if err == nil {
 				query.Rows = append(query.Rows, row)
 			} else {
