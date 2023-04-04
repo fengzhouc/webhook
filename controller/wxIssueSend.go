@@ -21,20 +21,13 @@ func WxIssueSend(c *gin.Context) {
 	query := issuedb.DbQuery{}
 	query.DB = issuedb.DbConn.DB
 	query.Table = "issues"
-	note := "**来告警了,老弟~**"
-	if msg.MsgType == "text" {
-		issueId := query.Insert(msg.Text.Content, "wx")
-		//根据issueId构造访问url，添加到告警内容中
-		click := fmt.Sprintf("\n\n点击[此处](%s/issues/%s)闭环告警", config.Config.ServerSetting.BaseUrl, issueId)
-		msg.Text.Content = fmt.Sprintf("%s\n>%s", note, msg.Text.Content)
-		msg.Text.Content += click
-	} else {
-		issueId := query.Insert(msg.Markdown.Content, "wx")
-		//根据issueId构造访问url，添加到告警内容中
-		click := fmt.Sprintf("\n\n点击[此处](%s/issues/%s)闭环告警", config.Config.ServerSetting.BaseUrl, issueId)
-		msg.Markdown.Content = fmt.Sprintf("%s\n>%s", note, msg.Markdown.Content)
-		msg.Markdown.Content += click
-	}
+	note := "**来告警了,老弟~**\n"
+	issueId := query.Insert(msg.NoteString(), "wx")
+	//根据issueId构造访问url，添加到告警内容中
+	click := fmt.Sprintf("\n\n点击[此处](%s/issues/%s)闭环告警", config.Config.ServerSetting.BaseUrl, issueId)
+	note += fmt.Sprintf(">%s", msg.NoteString())
+	note += click
+	msg.SetContent(note, msg.MsgType)
 	// 再添加消息队列中，如果队列满了，超时返回异常，不过异常也没关系，后面还有定时任务提醒未关闭的告警
 	err := msgqueue.MsgQueue.Send(&msg)
 	if err != nil {

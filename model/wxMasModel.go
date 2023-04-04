@@ -18,16 +18,45 @@ import (
 
 // 用于企微机器人消息的透传
 type WxMsgModel struct {
-	MsgType  string       `json:"msgtype" binding:"required"`
-	Markdown ContentModel `json:"markdown"`
-	Text     ContentModel `json:"text"`
+	MsgType      string            `json:"msgtype" binding:"required"`
+	Markdown     ContentModel      `json:"markdown"`
+	Text         ContentModel      `json:"text"`
+	Image        ImageModel        `json:"image"`
+	ImageContent ImageContentModel `json:"news"`
+	File         FileModel         `json:"file"`
 }
 
+// 文本及markdown的内容结构体
 type ContentModel struct {
 	Content             string   `json:"content"`
 	MentionedList       []string `json:"mentioned_list"`        //@谁，需要指定userid
 	MentionedMobileList []string `json:"mentioned_mobile_list"` // 如果获取不到userid，可以使用手机号
 }
+
+// 图片类型消息的内容结构体
+type ImageModel struct {
+	Base64 string `json:"base64"`
+	Md5    string `json:"md5"`
+}
+
+// 图文类型消息的内容结构体
+type ImageContentModel struct {
+	Articles []ArticlesModel `json:"articles"`
+}
+
+type ArticlesModel struct {
+	Title       string `json:"title"`
+	Description string `json:"description"`
+	Url         string `json:"url"`
+	PicUrl      string `json:"picurl"`
+}
+
+// 文件类型消息的内容结构体
+type FileModel struct {
+	MediaId string `json:"media_id"`
+}
+
+// TODO: 待实现上传文件获取media_id，按道理应该不用实现，发送的平台应该会先发送，然后拿到id发webhook消息
 
 // 企微返回的结构体
 type ErrMsgModel struct {
@@ -45,6 +74,27 @@ func (medol *ErrMsgModel) Init(json string) {
 func (medol *WxMsgModel) String() string {
 	jsons, _ := json.Marshal(medol)
 	return string(jsons)
+}
+
+// 根据msgtype转换成结构化文本，用于消息通知
+func (medol *WxMsgModel) NoteString() string {
+	switch medol.MsgType {
+	case "text":
+		return medol.Text.Content
+	case "markdown":
+		return medol.Markdown.Content
+	case "image":
+		return fmt.Sprintf("图片消息base64: %s", medol.Image.Base64)
+	case "news":
+		var news_title string
+		for i, article := range medol.ImageContent.Articles {
+			news_title += fmt.Sprintf("\n图文消息%d:%s", i, article.Title)
+		}
+		return news_title
+	case "file":
+		return fmt.Sprintf("文件消息media_id: %s", medol.File.MediaId)
+	}
+	return "Unsupported type, please contact the developer!!!"
 }
 
 // 发送webhook消息
@@ -70,12 +120,13 @@ func (text *WxMsgModel) Send() error {
 	return nil
 }
 
-// 设置消息内容
+// 用于重发消息时，将数据库中的消息内容重新设置,消息类型默认md格式，重发消息只是为了提醒，详情需要点击查看
 func (text *WxMsgModel) SetContent(msg string, msgtype string) {
-	if msgtype == "text" {
+	switch msgtype {
+	case "text":
 		text.MsgType = "text"
 		text.Text.Content = msg
-	} else {
+	default:
 		text.MsgType = "markdown"
 		text.Markdown.Content = msg
 	}
