@@ -61,7 +61,7 @@ func IssueHandler(context *gin.Context) {
 	query := issuedb.DbQuery{}
 	query.DB = issuedb.DbConn.DB
 	query.Table = "issues"
-	query.Update(form.Handle, form.HandleDesc, form.Status, form.IssueType, form.Owner, id.Id)
+	query.IssueHandlerUpdate(form.Handle, form.HandleDesc, form.Status, form.IssueType, form.Owner, id.Id)
 	context.String(http.StatusOK, "OK")
 	// 加一个，处置完后，展示告警处置情况
 	AfterHandle(id.Id)

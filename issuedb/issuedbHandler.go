@@ -72,18 +72,19 @@ type RowModel struct {
 	IssueType  string
 	Owner      string
 	Orgmsg     string
+	Count      int
 }
 
 // 查询数据
 func (query *DbQuery) Search() {
-	sql := fmt.Sprintf("SELECT issueId,desc,handle,handleDesc,status,form,issueType,owner,orgmsg FROM %s WHERE %s;", query.Table, query.Wherestring)
+	sql := fmt.Sprintf("SELECT issueId,desc,handle,handleDesc,status,form,issueType,owner,orgmsg,count FROM %s WHERE %s;", query.Table, query.Wherestring)
 	rows, err := query.DB.Query(sql)
 	if err != nil {
 		fmt.Println("[SELECT error] ", err)
 	} else {
 		for rows.Next() {
 			var row RowModel
-			err := rows.Scan(&row.Id, &row.Desc, &row.Handle, &row.HandleDesc, &row.Status, &row.Form, &row.IssueType, &row.Owner, &row.Orgmsg)
+			err := rows.Scan(&row.Id, &row.Desc, &row.Handle, &row.HandleDesc, &row.Status, &row.Form, &row.IssueType, &row.Owner, &row.Orgmsg, &row.Count)
 			if err == nil {
 				query.Rows = append(query.Rows, row)
 			} else {
@@ -97,19 +98,43 @@ func (query *DbQuery) Search() {
 // msg: 内容
 // form: 来自那个接口的，这个值会映射到配置文件中适配的webhook接口，也就是机器人列表
 func (query *DbQuery) Insert(msg string, form string, orgmsg string) (issueId string) {
-	sql := fmt.Sprintf("INSERT INTO %s (\"issueId\",\"desc\",\"status\",\"handle\",\"handleDesc\",\"form\",\"issueType\",\"owner\",\"orgmsg\") VALUES (?,?,?,?,?,?,?,?,?);", query.Table)
-	issueId = uuid.Must(uuid.NewV1()).String()
-	_, err := query.DB.Exec(sql, issueId, msg, "进行中", "", "", form, "", "", orgmsg)
-	if err != nil {
-		fmt.Println("[insert error] ", err)
+	query.Wherestring = fmt.Sprintf("desc=\"%s\"", msg)
+	query.Search()
+	// 没有添加过就直接添加
+	if len(query.Rows) == 0 {
+		sql := fmt.Sprintf("INSERT INTO %s (\"issueId\",\"desc\",\"status\",\"handle\",\"handleDesc\",\"form\",\"issueType\",\"owner\",\"orgmsg\",\"count\") VALUES (?,?,?,?,?,?,?,?,?,?);", query.Table)
+		issueId = uuid.Must(uuid.NewV1()).String()
+		_, err := query.DB.Exec(sql, issueId, msg, "进行中", "", "", form, "", "", orgmsg, 0)
+		if err != nil {
+			fmt.Println("[insert error] ", err)
+		} else {
+			return issueId
+		}
 	} else {
-		return issueId
+		// 添加过的就设置count= +1,然后返回已添加的id
+		query.Update("count", query.Rows[0].Count+1)
+		// 如果状态是关闭的，则重新打开
+		if query.Rows[0].Status == "关闭" {
+			query.Update("status", "进行中")
+		}
+		return query.Rows[0].Id
 	}
 	return "-1"
 }
 
+// 更新指定字段的数据
+func (query *DbQuery) Update(key string, value interface{}) error {
+	sql := fmt.Sprintf("UPDATE %s SET \"%s\"=?, \"update\"=CURRENT_TIMESTAMP WHERE %s", query.Table, key, query.Wherestring)
+	_, err := query.DB.Exec(sql, value)
+	if err != nil {
+		fmt.Println("[update error] ", err)
+		return err
+	}
+	return nil
+}
+
 // 更新数据,用于处置告警后的数据更新,传参要求：最后一个必须是issueId
-func (query *DbQuery) Update(msg ...interface{}) error {
+func (query *DbQuery) IssueHandlerUpdate(msg ...interface{}) error {
 	sql := fmt.Sprintf("UPDATE %s SET \"handle\"=?,\"handleDesc\"=?,\"status\"=?,\"issueType\"=?,\"owner\"=?, \"update\"=CURRENT_TIMESTAMP WHERE issueId=?", query.Table)
 	_, err := query.DB.Exec(sql, msg...)
 	if err != nil {
