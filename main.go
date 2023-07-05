@@ -1,7 +1,7 @@
 package main
 
 import (
-	"fmt"
+	"log"
 	"webhook/config"
 	"webhook/controller"
 	"webhook/engine"
@@ -24,7 +24,7 @@ func main() {
 			listeners.IssueListen()
 		})
 		if aerr != nil {
-			fmt.Println("AddFunc error :", aerr)
+			log.Println("AddFunc error :", aerr)
 			return
 		}
 		a.Start()

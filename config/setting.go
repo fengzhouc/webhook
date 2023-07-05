@@ -1,8 +1,8 @@
 package config
 
 import (
-	"fmt"
 	"io/ioutil"
+	"log"
 	"sync"
 
 	"gopkg.in/yaml.v2"
@@ -57,14 +57,14 @@ func loadYml() error {
 	// 1. 读取配置文件内容，将返回一个[]byte的内容
 	file, err := ioutil.ReadFile("./config.yml")
 	if err != nil {
-		// fmt.Println("[loadYml] ", err)
+		// log.Println("[loadYml] ", err)
 		return err
 	}
 
 	// 2. 使用yaml包进行反序列化
 	err = yaml.Unmarshal(file, Config)
 	if err != nil {
-		fmt.Print("Unmarshal: ", err)
+		log.Print("Unmarshal: ", err)
 		return err
 	}
 	return nil

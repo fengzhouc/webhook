@@ -2,6 +2,7 @@ package controller
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 	"webhook/config"
 	"webhook/issuedb"
@@ -31,7 +32,7 @@ func WxIssueSend(c *gin.Context) {
 	// 再添加消息队列中，如果队列满了，超时返回异常，不过异常也没关系，后面还有定时任务提醒未关闭的告警
 	err := msgqueue.MsgQueue.Send(&msg)
 	if err != nil {
-		fmt.Println("消息队列已满,添加失败！！！")
+		log.Println("消息队列已满,添加失败！！！")
 		c.String(http.StatusOK, "Add Failed!! Because the message queue is full.")
 	}
 	c.String(http.StatusOK, "OK.")

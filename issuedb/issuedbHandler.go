@@ -3,6 +3,7 @@ package issuedb
 import (
 	"database/sql"
 	"fmt"
+	"log"
 	"sync"
 	"time"
 	"webhook/config"
@@ -44,7 +45,7 @@ type DbConnection struct {
 func (DbConnection *DbConnection) ConntSqlite3() {
 	db, err := sql.Open("sqlite3", config.Config.DbSetting.Sqitepath)
 	if err != nil {
-		fmt.Printf("Open sqlite3 failed,err:%v\n", err)
+		log.Printf("Open sqlite3 failed,err:%v\n", err)
 	}
 	db.SetConnMaxLifetime(100 * time.Second)
 	db.SetMaxOpenConns(500)
@@ -54,6 +55,7 @@ func (DbConnection *DbConnection) ConntSqlite3() {
 
 //构建查询器，每次查询都创建对象，这样可以避免并发产生线程安全问题，使用构建器模式
 type DbQuery struct {
+	Select       string
 	Wherestring  string
 	Table        string
 	DB           *sql.DB
@@ -80,7 +82,7 @@ func (query *DbQuery) Search() {
 	sql := fmt.Sprintf("SELECT issueId,desc,handle,handleDesc,status,form,issueType,owner,orgmsg,count FROM %s WHERE %s;", query.Table, query.Wherestring)
 	rows, err := query.DB.Query(sql)
 	if err != nil {
-		fmt.Println("[SELECT error] ", err)
+		log.Println("[SELECT error] ", err)
 	} else {
 		for rows.Next() {
 			var row RowModel
@@ -88,7 +90,7 @@ func (query *DbQuery) Search() {
 			if err == nil {
 				query.Rows = append(query.Rows, row)
 			} else {
-				fmt.Println("[Scan error] ", err)
+				log.Println("[Scan error] ", err)
 			}
 		}
 	}
@@ -106,7 +108,7 @@ func (query *DbQuery) Insert(msg string, form string, orgmsg string) (issueId st
 		issueId = uuid.Must(uuid.NewV1()).String()
 		_, err := query.DB.Exec(sql, issueId, msg, "进行中", "", "", form, "", "", orgmsg, 0)
 		if err != nil {
-			fmt.Println("[insert error] ", err)
+			log.Println("[insert error] ", err)
 		} else {
 			return issueId
 		}
@@ -124,10 +126,10 @@ func (query *DbQuery) Insert(msg string, form string, orgmsg string) (issueId st
 
 // 更新指定字段的数据
 func (query *DbQuery) Update(key string, value interface{}) error {
-	sql := fmt.Sprintf("UPDATE %s SET \"%s\"=?, \"update\"=CURRENT_TIMESTAMP WHERE %s", query.Table, key, query.Wherestring)
+	sql := fmt.Sprintf("UPDATE %s SET \"%s\"=?, \"update\"=DATETIME('now','localtime') WHERE %s", query.Table, key, query.Wherestring)
 	_, err := query.DB.Exec(sql, value)
 	if err != nil {
-		fmt.Println("[update error] ", err)
+		log.Println("[update error] ", err)
 		return err
 	}
 	return nil
@@ -138,7 +140,7 @@ func (query *DbQuery) IssueHandlerUpdate(msg ...interface{}) error {
 	sql := fmt.Sprintf("UPDATE %s SET \"handle\"=?,\"handleDesc\"=?,\"status\"=?,\"issueType\"=?,\"owner\"=?, \"update\"=CURRENT_TIMESTAMP WHERE issueId=?", query.Table)
 	_, err := query.DB.Exec(sql, msg...)
 	if err != nil {
-		fmt.Println("[update error] ", err)
+		log.Println("[update error] ", err)
 		return err
 	}
 	return nil

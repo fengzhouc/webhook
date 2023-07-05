@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"strings"
 	"webhook/config"
@@ -101,19 +102,19 @@ func (medol *WxMsgModel) NoteString() string {
 func (text *WxMsgModel) Send() error {
 	resp, err := http.Post(config.Config.WebHookServerSetting.Wx, "application/json", strings.NewReader(text.String()))
 	if err != nil {
-		fmt.Println("[wx.Send.Post] ", err)
+		log.Println("[wx.Send.Post] ", err)
 		return err
 	}
 	defer resp.Body.Close()                //设置最后关闭resp
 	body, err := ioutil.ReadAll(resp.Body) //获取响应数据
 	if err != nil {
-		fmt.Println("[wx.Send.ReadAll] ", err)
+		log.Println("[wx.Send.ReadAll] ", err)
 		return err
 	}
 	errmsg := ErrMsgModel{}
 	errmsg.Init(string(body))
 	if errmsg.ErrCode != 0 {
-		fmt.Println("[wx.Send.Err] send faild!! ", string(body))
+		log.Println("[wx.Send.Err] send faild!! ", string(body))
 		return errors.New(string(body))
 	}
 
